@@ -89,21 +89,21 @@ mod tests {
     use super::*;
 
     macro_rules! base {
-            {$fmt:literal => $val:expr, $unit:expr, $sys:expr, $sep:expr} => {{
-                struct H;
-                impl fmt::Display for H {
-                    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-                        large_repr($val as f64, $unit, $sys, $sep, f)
-                    }
+        ($fmt:literal => $val:expr, $unit:expr, $sys:expr, $sep:expr) => {{
+            struct H;
+            impl fmt::Display for H {
+                fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+                    large_repr($val as f64, $unit, $sys, $sep, f)
                 }
-                format!($fmt)
-            }};
-        }
+            }
+            format!($fmt)
+        }};
+    }
 
     #[test]
     fn operation() {
         macro_rules! case {
-            {$val:expr} => {
+            ($val:expr) => {
                 base!("{H}" => $val, "", Some(System::SI), Sep::NoSep)
             };
         }
@@ -132,7 +132,7 @@ mod tests {
     #[test]
     fn precision() {
         macro_rules! case {
-            {$val:expr} => {
+            ($val:expr) => {
                 base!("{H:#}" => $val, "", Some(System::SI), Sep::NoSep)
             };
         }
@@ -151,7 +151,7 @@ mod tests {
     #[test]
     fn units() {
         macro_rules! case {
-            {$val:expr, $unit:expr} => {
+            ($val:expr, $unit:expr) => {
                 base!("{H}" => $val, $unit, Some(System::SI), Sep::NoSep)
             };
         }
@@ -179,7 +179,7 @@ mod tests {
     #[test]
     fn separators() {
         macro_rules! case {
-            {$val:expr, $unit:expr} => {
+            ($val:expr, $unit:expr) => {
                 base!("{H}" => $val, $unit, Some(System::SI), Sep::WithSep)
             };
         }
@@ -207,7 +207,7 @@ mod tests {
     #[test]
     fn systems() {
         macro_rules! case {
-            {$val:expr, $sys:expr} => {
+            ($val:expr, $sys:expr) => {
                 base!("{H}" => $val, "", Some($sys), Sep::NoSep)
             };
         }

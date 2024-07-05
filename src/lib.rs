@@ -18,7 +18,7 @@ use std::borrow::Cow;
 const BYTES: &str = "B";
 
 macro_rules! impl_trait {
-    {$($t:ty),+} => {$(
+    ($($t:ty),+) => {$(
         impl HumanCount for $t {
             #[inline]
             fn human_count_with<'a>(
@@ -42,7 +42,7 @@ mod sealed {
 
     pub trait Sealed {}
     macro_rules! impl_sealed {
-        {$($t:ty),+} => {
+        ($($t:ty),+) => {
             $(impl Sealed for $t {})+
         }
     }
