@@ -60,11 +60,23 @@ impl PartialEq<&str> for HumanCountData<'_> {
 }
 
 #[cfg(feature = "parse")]
-impl std::str::FromStr for HumanCountData<'_> {
-    type Err = &'static str;
+mod parse {
+    use super::HumanCountData;
 
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        todo!()
+    impl std::str::FromStr for HumanCountData<'_> {
+        type Err = &'static str;
+
+        fn from_str(_s: &str) -> Result<Self, Self::Err> {
+            todo!()
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        #[test]
+        fn parse() -> Result<(), serde_json::Error> {
+            todo!()
+        }
     }
 }
 
@@ -91,6 +103,21 @@ mod serde {
             s.parse().map_err(de::Error::custom)
         }
     }
+
+    #[cfg(test)]
+    mod tests {
+        use crate::{HumanCount, HumanCountData};
+
+        #[test]
+        fn serde() -> Result<(), serde_json::Error> {
+            let h = 123456.human_count_of("X");
+            let ser = serde_json::to_string(&h)?;
+            assert_eq!(r#"{"val":123456.0,"unit":"X"}"#, &ser);
+            let h2 = serde_json::from_str::<HumanCountData>(&ser)?;
+            assert_eq!(h, h2);
+            Ok(())
+        }
+    }
 }
 
 #[cfg(all(
@@ -101,67 +128,44 @@ mod tests {
     use crate::*;
 
     #[test]
-    fn operation() {
-        assert_eq!("123kB", 123000_u64.human_count_bytes());
-        assert_eq!("123.5kB", 123456_u64.human_count_bytes());
-        assert_eq!("1kB", 999.96.human_count_bytes());
-        assert_eq!("23B", 23u8.human_count_bytes());
-        assert_eq!("23B", 23i8.human_count_bytes());
-        assert_eq!("23.5B", 23.5123.human_count_bytes());
-        assert_eq!("-23B", (-23i8).human_count_bytes());
-        assert_eq!("1kB", 1025u16.human_count_bytes());
-        assert_eq!("-1kB", (-1025i16).human_count_bytes());
-        assert_eq!("43.2MB", 43214321u32.human_count_bytes());
-        assert_eq!("23.4GB", 23403454432_u64.human_count_bytes());
-        assert_eq!("0.2B", 0.23403454432.human_count_bytes());
-        assert_eq!("23.43GB", 23433454432_u64.human_count_bytes());
-        assert_eq!("18.45EB", u64::MAX.human_count_bytes());
-        assert_eq!("9.22EB", i64::MAX.human_count_bytes());
-        assert_eq!("-9.22EB", i64::MIN.human_count_bytes());
-        assert_eq!("1RB", 999.999e24.human_count_bytes());
-        assert_eq!("1.12RB", 1.123456e27.human_count_bytes());
-        assert_eq!("1.12QB", 1.123456e30.human_count_bytes());
-        assert_eq!("1123.46QB", 1.123456e33.human_count_bytes());
-    }
+    fn types() {
+        assert_eq!("123", 123_u8.human_count());
+        assert_eq!("123", 123_i8.human_count());
+        assert_eq!("123", 123_u16.human_count());
+        assert_eq!("123", 123_i16.human_count());
+        assert_eq!("123", 123_u32.human_count());
+        assert_eq!("123", 123_i32.human_count());
+        assert_eq!("123", 123_u64.human_count());
+        assert_eq!("123", 123_i64.human_count());
+        assert_eq!("123", 123_u128.human_count());
+        assert_eq!("123", 123_i128.human_count());
+        assert_eq!("123", 123_usize.human_count());
+        assert_eq!("123", 123_isize.human_count());
+        assert_eq!("123", 123_f32.human_count());
+        assert_eq!("123", 123_f64.human_count());
 
-    #[test]
-    fn precision() {
-        macro_rules! p {
-            {$n:expr} => {{
-                format!("{:#}", $n.human_count_bytes())
-            }};
-        }
-        assert_eq!("123kB", p!(123000_u64));
-        assert_eq!("123.456kB", p!(123456_u64));
-        assert_eq!("23.5123B", p!(23.5123));
-        assert_eq!("-23B", p!(-23i8));
-        assert_eq!("1.025kB", p!(1025u16));
-        assert_eq!("0.23403454432B", p!(0.23403454432));
-        assert_eq!("23GB", p!(23e9));
-        assert_eq!("23.000000001GB", p!(23e9 + 1.));
-        assert_eq!("0.999999999999RB", p!(999.999999999e24));
-        assert_eq!("1.123456RB", p!(1.123456e27));
-    }
-
-    #[test]
-    fn flexibility() {
-        assert_eq!("123MCrabs", 123e6.human_count_of("Crabs"));
-        assert_eq!("123k🦀", 123e3.human_count_of("🦀"));
-        assert_eq!("12.3k°C", 123e2.human_count_of("°C"));
+        assert_eq!("-123", (-123_i8).human_count());
+        assert_eq!("-123", (-123_i16).human_count());
+        assert_eq!("-123", (-123_i32).human_count());
+        assert_eq!("-123", (-123_i64).human_count());
+        assert_eq!("-123", (-123_i128).human_count());
+        assert_eq!("-123", (-123_isize).human_count());
+        assert_eq!("-123", (-123_f32).human_count());
+        assert_eq!("-123", (-123_f64).human_count());
     }
 
     #[test]
     #[allow(clippy::needless_borrow)]
     fn ownership() {
         let mut a = 42000;
-        assert_eq!("42kB", a.human_count_bytes());
-        assert_eq!("42kB", (&a).human_count_bytes());
-        assert_eq!("42kB", (&mut a).human_count_bytes());
+        assert_eq!("42k", a.human_count());
+        assert_eq!("42k", (&a).human_count());
+        assert_eq!("42k", (&mut a).human_count());
     }
 
     #[test]
     fn symmetric() {
-        assert_eq!(123000_u64.human_count_bytes(), "123kB");
+        assert_eq!(123000_u64.human_count(), "123k");
     }
 
     #[test]
@@ -175,22 +179,5 @@ mod tests {
         let c3 = 0.234034.human_count_bytes(); // same value.
         assert_eq!("0.2B", c3); // different unit.
         assert_ne!(c2, c3); // also different.
-    }
-
-    #[test]
-    #[cfg(feature = "parse")]
-    fn parse() -> Result<(), serde_json::Error> {
-        todo!()
-    }
-
-    #[test]
-    #[cfg(feature = "serde")]
-    fn serde() -> Result<(), serde_json::Error> {
-        let h = 123456.human_count_of("X");
-        let ser = serde_json::to_string(&h)?;
-        assert_eq!(r#"{"val":123456.0,"unit":"X"}"#, &ser);
-        let h2 = serde_json::from_str::<HumanCountData>(&ser)?;
-        assert_eq!(h, h2);
-        Ok(())
     }
 }
