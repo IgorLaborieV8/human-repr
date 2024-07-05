@@ -30,12 +30,12 @@ impl From<System> for Option<ReprCount> {
     }
 }
 
-impl From<Sep> for ReprCount {
+impl From<Sep> for Option<ReprCount> {
     fn from(sep: Sep) -> Self {
-        Self {
+        Some(ReprCount {
             sep: Some(sep),
-            ..Self::default()
-        }
+            ..ReprCount::default()
+        })
     }
 }
 

@@ -155,6 +155,32 @@ mod tests {
     }
 
     #[test]
+    fn units() {
+        assert_eq!("123MCrabs", 123e6.human_count_of("Crabs"));
+        assert_eq!("123k🦀", 123e3.human_count_of("🦀"));
+        assert_eq!("12.3k°C", 123e2.human_count_of("°C"));
+    }
+
+    #[test]
+    fn repr() {
+        assert_eq!("12.3M", 123e5.human_count_with("", None)); // default.
+        assert_eq!("11.7Mi", 123e5.human_count_with("", System::IEC)); // with system.
+        assert_eq!("12.3 M", 123e5.human_count_with("", Sep::WithSep)); // with sep.
+        assert_eq!(
+            "11.7 Mi",
+            123e5.human_count_with("", ReprCount::new(System::IEC, Sep::WithSep))
+        ); // with system and sep.
+
+        assert_eq!("12.3MUnit", 123e5.human_count_with("Unit", None)); // with unit.
+        assert_eq!("11.7MiUnit", 123e5.human_count_with("Unit", System::IEC)); // with system and unit.
+        assert_eq!("12.3 MUnit", 123e5.human_count_with("Unit", Sep::WithSep)); // with sep and unit.
+        assert_eq!(
+            "11.7 MiUnit",
+            123e5.human_count_with("Unit", ReprCount::new(System::IEC, Sep::WithSep))
+        ); // with system, sep and unit.
+    }
+
+    #[test]
     #[allow(clippy::needless_borrow)]
     fn ownership() {
         let mut a = 42000;
