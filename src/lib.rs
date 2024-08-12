@@ -19,7 +19,7 @@ pub struct HumanCountData<'a> {
 }
 
 /// Human Duration data, ready to generate Debug and Display representations.
-#[derive(PartialEq, PartialOrd)] // Debug and Display impls in the specific module.
+#[derive(Clone, Copy, PartialEq, PartialOrd)] // Debug and Display impls in the specific module.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HumanDurationData {
     val: f64,
